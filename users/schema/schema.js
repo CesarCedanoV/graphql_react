@@ -1,5 +1,5 @@
 const graphQL = require('graphql');
-const _ = require('lodash');
+const jsonServerAPI = require('../apis/json-server');
 
 const {
   GraphQLObjectType,
@@ -7,11 +7,6 @@ const {
   GraphQLInt,
   GraphQLSchema
 } = graphQL;
-
-const user = [
-  { id: '10', firstName: 'Cesar', age:24},
-  { id: '25', firstName: 'Arlenys', age:22}
-];
 
 const UserType = new GraphQLObjectType({
   name: 'User',
@@ -29,7 +24,8 @@ const RootQuery = new GraphQLObjectType({
       type: UserType,
       args: { id: {type: GraphQLString} },
       resolve(parentValue, args) {
-        return user.find( ({ id }) => id === args.id)
+        return jsonServerAPI.get(`/users/${args.id}`)
+        .then( response => response.data)
       }
     }
   }
