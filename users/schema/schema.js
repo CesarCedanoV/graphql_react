@@ -6,7 +6,8 @@ const {
   GraphQLString,
   GraphQLInt,
   GraphQLList,
-  GraphQLSchema
+  GraphQLSchema,
+  GraphQLNonNull
 } = graphQL;
 
 const CompanyType = new GraphQLObjectType({
@@ -63,6 +64,48 @@ const RootQuery = new GraphQLObjectType({
   }
 });
 
+const mutation = new GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    addUser: {
+      type: UserType,
+      args: {
+        firstName: {type: new GraphQLNonNull(GraphQLString)},
+        age: { type: new GraphQLNonNull(GraphQLInt)},
+        companyId: { type: GraphQLString}
+      },
+      resolve(parentValue, args) {
+        return jsonServerAPI.post(`/users`, args)
+          .then( res => res.data);
+      }
+    },
+    deleteUser: {
+      type: UserType,
+      args: {
+        id: {type: new GraphQLNonNull(GraphQLString)}
+      },
+      resolve(parentValue, {id}) {
+        return jsonServerAPI.delete(`/users/${id}`)
+          .then( res => res.data);
+      }
+    },
+    updateUser: {
+      type: UserType,
+      args: {
+        id: { type: new GraphQLNonNull(GraphQLString)},
+        firstName: { type: GraphQLString},
+        age: { type: GraphQLInt},
+        companyId: { type : GraphQLString}
+      },
+      resolve(parentValue, args) {
+        return jsonServerAPI.patch(`/users/${args.id}`, args)
+          .then( res => res.data);
+      }
+    }
+  }
+});
+
 module.exports = new GraphQLSchema({
-  query: RootQuery
+  query: RootQuery,
+  mutation
 });
